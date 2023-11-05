@@ -1,0 +1,33 @@
+version: 0.2
+phases:
+  install:
+    runtime-versions:
+      nodejs: 18
+  pre_build:
+    commands:
+      - apt-get update
+      - echo Installing hugo
+      - curl -L -o hugo.deb https://github.com/gohugoio/hugo/releases/download/v0.101.0/hugo_extended_0.101.0_Linux-64bit.deb
+      - dpkg -i hugo.deb
+      - echo In pre_build phase..
+      - echo Current directory is $CODEBUILD_SRC_DIR
+      - ls -la
+      - hugo -v --config config.toml,config.production.toml
+     
+  build:
+    commands:
+      - echo Pushing build to, $BUCKET_NAME
+      - aws s3 rm s3://www.infopercept.com --recursive
+      - aws s3 sync "./public" s3://www.infopercept.com
+      
+
+  post_build:
+    commands:
+      - echo invalidation $CLOUDFRONT_ID
+      - aws cloudfront create-invalidation --distribution-id E2ISDC44ENILUF --paths '/*'
+      - echo $?
+      
+artifacts:
+  files:
+    - '**/*'
+  base-directory: public
