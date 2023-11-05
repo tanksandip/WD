@@ -19,8 +19,6 @@ phases:
       - echo Pushing build to, $BUCKET_NAME
       - aws s3 rm s3://www.infopercept.com --recursive
       - aws s3 sync "./public" s3://www.infopercept.com
-      
-
   post_build:
     commands:
       - echo invalidation $CLOUDFRONT_ID
